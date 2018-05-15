@@ -15,7 +15,7 @@ downloaded_songs = []
 
 if os.path.isfile("songs.json"):
     with open("songs.json", "r") as handle:
-        downloaded_songs = json.reads(handle.read())
+        downloaded_songs = json.loads(handle.read())
 
 
 while True:
@@ -28,7 +28,7 @@ while True:
             print("Downloading {}".format(html.unescape(song['beatname'])))
             response = requests.get(download.format(song['id']))
             with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-                song_zip.extractall("Songs/.".format(song['beatname']))
+                song_zip.extractall("CustomSongs/.".format(song['beatname']))
 
             # Add to downloaded
             downloaded_songs.append(song['id'])
