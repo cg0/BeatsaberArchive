@@ -1,6 +1,5 @@
 import requests
 import os.path
-import os
 import zipfile
 import json
 import html
