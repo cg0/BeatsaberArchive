@@ -12,13 +12,14 @@ offset = 0
 download = "https://beatsaver.com/files/{}.zip"
 downloaded_songs = []
 this_session = 0
+processing = True
 
 if os.path.isfile("songs.json"):
     with open("songs.json", "r") as handle:
         downloaded_songs = json.loads(handle.read())
 
 
-while True:
+while processing:
     response = requests.get(api.format(offset)).json()
     offset += offset_inc
     if len(response) == 0:
@@ -27,6 +28,7 @@ while True:
         if song['id'] in downloaded_songs:
             # We found a song we already downloaded
             # Assume we've done them all
+            processing = False
             break
         print("Downloading {}".format(html.unescape(song['beatname'])))
         this_session += 1
