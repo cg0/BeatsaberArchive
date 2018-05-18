@@ -24,14 +24,17 @@ while True:
     if len(response) == 0:
         break
     for song in response:
-        if song['id'] not in downloaded_songs:
-            print("Downloading {}".format(html.unescape(song['beatname'])))
-            response = requests.get(download.format(song['id']))
-            with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-                song_zip.extractall("CustomSongs/.".format(song['beatname']))
+        if song['id'] in downloaded_songs:
+            # We found a song we already downloaded
+            # Assume we've done them all
+            break
+        print("Downloading {}".format(html.unescape(song['beatname'])))
+        response = requests.get(download.format(song['id']))
+        with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
+            song_zip.extractall("CustomSongs/.".format(song['beatname']))
 
-            # Add to downloaded
-            downloaded_songs.append(song['id'])
+        # Add to downloaded
+        downloaded_songs.append(song['id'])
     
     with open("songs.json", "w") as handle:
         handle.write(json.dumps(downloaded_songs))
