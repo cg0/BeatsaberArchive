@@ -6,7 +6,6 @@ import json
 import html
 import io
 import string
-import re
 
 api = "https://beatsaver.com/api.php?mode=new&off={}"
 offset_inc = 15
