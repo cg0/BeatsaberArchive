@@ -1,9 +1,12 @@
 import requests
-import os.path
+import os
+import shutil
 import zipfile
 import json
 import html
 import io
+import string
+import re
 
 api = "https://beatsaver.com/api.php?mode=new&off={}"
 offset_inc = 15
@@ -17,6 +20,25 @@ processing = True
 if os.path.isfile("songs.json"):
     with open("songs.json", "r") as handle:
         downloaded_songs = json.loads(handle.read())
+
+def escape(s): # Function for ensuring that song names are proper foldernames for windows
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    filename = ''.join(c for c in s if c in valid_chars)
+    filename = filename.replace(' ','') # Remove spaces to avoid issues
+    return filename
+
+def extractZip(zip_file, song_name): # Extract zip files into folder with song name ignoring the first directory within the zip
+    for zip_info in zip_file.infolist(): # for each file in the zip
+    	if not zip_info.filename.endswith('/') and zip_info.filename.count('/') < 2: # if its not the first directory or files in sub directories
+            data = zip_file.read(zip_info.filename) # read that file
+            if not os.path.exists(os.path.dirname(song_name+os.path.basename(zip_info.filename))): 
+                os.makedirs(os.path.dirname(song_name+os.path.basename(zip_info.filename))) # create any directories that are needed if they dont exist
+            try:
+                with io.FileIO(song_name+os.path.basename(zip_info.filename), "w") as file:
+                    file.write(data) # write the file to disk
+            except OSError as exc:
+            	if True:
+            	    print(os.path.basename(zip_info.filename), 'FAIL')
 
 
 while processing:
@@ -34,7 +56,8 @@ while processing:
         this_session += 1
         response = requests.get(download.format(song['id']))
         with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-            song_zip.extractall("CustomSongs/.".format(song['beatname']))
+        	extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
+        	# Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
 
         # Add to downloaded
         downloaded_songs.append(song['id'])
