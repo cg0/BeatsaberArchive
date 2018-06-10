@@ -54,9 +54,12 @@ while processing:
         print("Downloading {}".format(html.unescape(song['beatname'])))
         this_session += 1
         response = requests.get(download.format(song['id']))
-        with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-            extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
-            # Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
+        try:
+            with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
+                extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
+                # Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
+        except:
+            print("Failed to download {}. An Error occoured".format(html.unescape(song['beatname'])))
 
         # Add to downloaded
         downloaded_songs.append(song['id'])
