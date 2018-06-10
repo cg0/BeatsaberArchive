@@ -28,7 +28,7 @@ def escape(s): # Function for ensuring that song names are proper foldernames fo
 
 def extractZip(zip_file, song_name): # Extract zip files into folder with song name ignoring the first directory within the zip
     for zip_info in zip_file.infolist(): # for each file in the zip
-    	if not zip_info.filename.endswith('/') and zip_info.filename.count('/') < 2: # if its not the first directory or files in sub directories
+        if not zip_info.filename.endswith('/') and zip_info.filename.count('/') < 2: # if its not the first directory or files in sub directories
             data = zip_file.read(zip_info.filename) # read that file
             if not os.path.exists(os.path.dirname(song_name+os.path.basename(zip_info.filename))): 
                 os.makedirs(os.path.dirname(song_name+os.path.basename(zip_info.filename))) # create any directories that are needed if they dont exist
@@ -36,8 +36,8 @@ def extractZip(zip_file, song_name): # Extract zip files into folder with song n
                 with io.FileIO(song_name+os.path.basename(zip_info.filename), "w") as file:
                     file.write(data) # write the file to disk
             except OSError as exc:
-            	if True:
-            	    print(os.path.basename(zip_info.filename), 'FAIL')
+                if True:
+                    print(os.path.basename(zip_info.filename), 'FAIL')
 
 
 while processing:
@@ -54,9 +54,12 @@ while processing:
         print("Downloading {}".format(html.unescape(song['beatname'])))
         this_session += 1
         response = requests.get(download.format(song['id']))
-        with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-        	extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
-        	# Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
+        try:
+            with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
+                extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
+                # Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
+        except:
+            print("Failed to download {}. An Error occoured".format(html.unescape(song['beatname'])))
 
         # Add to downloaded
         downloaded_songs.append(song['id'])
