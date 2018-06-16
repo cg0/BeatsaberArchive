@@ -8,7 +8,6 @@ import io
 import string
 
 api = "https://beatsaver.com/api.php?mode=new&off={}"
-offset_inc = 15
 offset = 0
 
 download = "https://beatsaver.com/files/{}.zip"
@@ -42,7 +41,7 @@ def extractZip(zip_file, song_name): # Extract zip files into folder with song n
 
 while processing:
     response = requests.get(api.format(offset)).json()
-    offset += offset_inc
+    offset += len(response)
     if len(response) == 0:
         break
     for song in response:
