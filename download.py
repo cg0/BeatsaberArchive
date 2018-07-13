@@ -7,10 +7,10 @@ import html
 import io
 import string
 
-api = "https://beatsaver.com/api.php?mode=new&off={}"
+api = "https://beatsaver.com/api/songs/new/{}"
 offset = 0
 
-download = "https://beatsaver.com/files/{}.zip"
+download = "https://beatsaver.com/download/{}"
 downloaded_songs = []
 this_session = 0
 processing = True
@@ -44,21 +44,21 @@ while processing:
     offset += len(response)
     if len(response) == 0:
         break
-    for song in response:
+    for song in response['songs']:
         if song['id'] in downloaded_songs:
             # We found a song we already downloaded
             # Assume we've done them all
             processing = False
             break
-        print("Downloading {}".format(html.unescape(song['beatname'])))
+        print("Downloading {}".format(html.unescape(song['name'])))
         this_session += 1
-        response = requests.get(download.format(song['id']))
+        response = requests.get(download.format(song['key']))
         try:
             with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-                extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
+                extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['name'])))) 
                 # Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
         except:
-            print("Failed to download {}. An Error occoured".format(html.unescape(song['beatname'])))
+            print("Failed to download {}. An Error occoured".format(html.unescape(song['name'])))
 
         # Add to downloaded
         downloaded_songs.append(song['id'])
