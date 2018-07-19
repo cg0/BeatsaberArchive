@@ -6,11 +6,12 @@ import json
 import html
 import io
 import string
+import unicodedata
 
-api = "https://beatsaver.com/api.php?mode=new&off={}"
+api = "https://beatsaver.com/api/songs/new/{}"
 offset = 0
 
-download = "https://beatsaver.com/files/{}.zip"
+download = "https://beatsaver.com/download/{}"
 downloaded_songs = []
 this_session = 0
 processing = True
@@ -40,25 +41,28 @@ def extractZip(zip_file, song_name): # Extract zip files into folder with song n
 
 
 while processing:
-    response = requests.get(api.format(offset)).json()
-    offset += len(response)
-    if len(response) == 0:
+    request = requests.get(api.format(offset))
+    response = json.loads(request.text)
+    offset += len(response['songs'])
+    if len(response['songs']) == 0:
         break
-    for song in response:
+    for song in response['songs']:
         if song['id'] in downloaded_songs:
             # We found a song we already downloaded
             # Assume we've done them all
             processing = False
             break
-        print("Downloading {}".format(html.unescape(song['beatname'])))
+        songName = unicodedata.normalize("NFKD", song['name'])
+        print(songName)
+        print("Downloading {}".format(html.unescape(songName)))
         this_session += 1
-        response = requests.get(download.format(song['id']))
+        response = requests.get(download.format(song['key']))
         try:
             with zipfile.ZipFile(io.BytesIO(response.content)) as song_zip:
-                extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(song['beatname'])))) 
+                extractZip(song_zip, "CustomSongs/{}/".format(escape(html.unescape(songName)))) 
                 # Write out all the files for the zip to a folder named after the songname with html escaped characters and escaping
         except:
-            print("Failed to download {}. An Error occoured".format(html.unescape(song['beatname'])))
+            print("Failed to download {}. An Error occoured".format(html.unescape(songName)))
 
         # Add to downloaded
         downloaded_songs.append(song['id'])
