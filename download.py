@@ -55,6 +55,7 @@ while processing:
         songName = unicodedata.normalize("NFKD", song['name'])
         print(songName)
         print("Downloading {}".format(html.unescape(songName)))
+
         this_session += 1
         response = requests.get(download.format(song['key']))
         try:
